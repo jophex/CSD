@@ -3,7 +3,15 @@ const fs = require('fs');
 const path = require('path');
 const axios = require('axios');
 
-console.log('im here now')
+require("dotenv").config({
+  path: path.resolve(__dirname, '.env')
+});
+
+const Gemin_keys = process.env.GEMIN_AI_keys;
+// console.log('here is keys',Gemin_keys) 
+
+
+// console.log('im here now')
 /**
  * @param {vscode.ExtensionContext} context
  */
@@ -17,6 +25,7 @@ function activate(context) {
 			
         );
 		console.log('open ai analized');
+		vscode.window.showWarningMessage('open ai api not available')
 
         const workspaceFolders = vscode.workspace.workspaceFolders;
         if (workspaceFolders) {
@@ -34,6 +43,7 @@ function activate(context) {
                     const filesToAnalyze = message.files;
                     const query = message.query;
                     const fileContents = await getFileContents(filesToAnalyze);
+					console.log({'file content':fileContents});
                     const result = await sendToAIAPI(fileContents, query);
                     panel.webview.postMessage({ command: 'result', result: result });
                 }
@@ -69,8 +79,9 @@ async function getFileContents(files) {
     return contents;
 }
 
+
 async function sendToAIAPI(fileContents, query) {
-    const apiKey = 'YOUR_API_KEY';
+    const apiKey = Gemin_keys;
     const apiUrl = 'https://api.gemini.ai/analyze'; // Replace with the actual API URL
 
     const response = await axios.post(apiUrl, {
@@ -86,22 +97,51 @@ async function sendToAIAPI(fileContents, query) {
     return response.data;
 }
 
+
+// const { GoogleGenerativeAI } = require("@google/generative-ai");
+
+// // Access your API key as an environment variable (see "Set up your API key" above)
+// const genAI = new GoogleGenerativeAI(Gemin_keys);
+
+
+
+// // The Gemini 1.5 models are versatile and work with both text-only and multimodal prompts
+// const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash"});
+
+
+
+// async function run() {
+//   const prompt = "whats the difference between codding and programming."
+
+//   const result = await model.generateContent(prompt);
+//   const response = await result.response;
+//   const text = response.text();
+//   console.log(text);
+// }
+
+// run();
+
+
+
 function generateFileStructureHTML(structure) {
     let html = '<ul>';
     for (const item of structure) {
         if (item.type === 'directory') {
-            html += `<li>📁
-							${item.name}
-						<ul> 📄 
-							${generateFileStructureHTML(item.children)}
-						</ul>
-					</li>`;
+            html += `
+
+			<li class="directory">📁
+                    <span class="directory-name"> ${item.name}</span>
+                    <ul class="directory-content">
+                        <span> 📄└─ ${generateFileStructureHTML(item.children)}</span>
+                    </ul>
+                </li>`;
+			
         } else {
-            html += `<li>
+            html += `<li class="file">
 			
 				<input type="checkbox" value="${item.path}">
 				
-				${item.name}
+				<span>${item.name}</span>
 			
 			</li>`;
 			// console.log(item.name);
@@ -113,25 +153,32 @@ function generateFileStructureHTML(structure) {
 
 function getWebviewContent(fileStructure) {
     const fileStructureHTML = generateFileStructureHTML(fileStructure);
-    console.log(`Generated HTML: ${fileStructureHTML}`); // Log generated HTML
+    // console.log(`Generated HTML: ${fileStructureHTML}`); // Log generated HTML
     return `
         <!DOCTYPE html>
         <html lang="en">
 		<head>
 			<style>
-				body {
+		body {
                     font-family: Arial, sans-serif;
                     padding: 20px;
                 }
                 h1 {
                     color: #007acc;
                 }
-                #file-structure ul {
+                ul {
                     list-style-type: none;
                     padding-left: 20px;
                 }
-                #file-structure li {
-                    margin: 5px 0;
+                .directory-name {
+                    cursor: pointer;
+                }
+                .directory-content {
+                    display: none;
+                    padding-left: 20px;
+                }
+                .directory.open > .directory-content {
+                    display: block;
                 }
                 input[type="checkbox"] {
                     margin-right: 10px;
@@ -173,11 +220,18 @@ function getWebviewContent(fileStructure) {
             <div id="file-structure">
                 ${fileStructureHTML}
             </div>
+            <select id="file-select" multiple></select>
             <textarea id="query" rows="4" cols="50" placeholder="Enter your query..."></textarea>
             <button id="analyze">Analyze</button>
             <pre id="result"></pre>
 
             <script>
+                document.querySelectorAll('.directory-name').forEach(dir => {
+                    dir.addEventListener('click', () => {
+                        dir.parentElement.classList.toggle('open');
+                    });
+                });
+
                 const vscode = acquireVsCodeApi();
                 document.getElementById('analyze').addEventListener('click', () => {
                     const selectedFiles = Array.from(document.querySelectorAll('#file-structure input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
@@ -191,8 +245,6 @@ function getWebviewContent(fileStructure) {
                         document.getElementById('result').textContent = message.result;
                     }
                 });
-
-                console.log('Webview script loaded'); // Log when script loads
             </script>
         </body>
         </html>
