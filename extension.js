@@ -155,99 +155,148 @@ function getWebviewContent(fileStructure) {
     const fileStructureHTML = generateFileStructureHTML(fileStructure);
     // console.log(`Generated HTML: ${fileStructureHTML}`); // Log generated HTML
     return `
-        <!DOCTYPE html>
-        <html lang="en">
-		<head>
-			<style>
-		body {
-                    font-family: Arial, sans-serif;
-                    padding: 20px;
-                }
-                h1 {
-                    color: #007acc;
-                }
-                ul {
-                    list-style-type: none;
-                    padding-left: 20px;
-                }
-                .directory-name {
-                    cursor: pointer;
-                }
-                .directory-content {
-                    display: none;
-                    padding-left: 20px;
-                }
-                .directory.open > .directory-content {
-                    display: block;
-                }
-                input[type="checkbox"] {
-                    margin-right: 10px;
-                    transform: scale(1.2);
-                }
-                #file-select {
-                    width: 100%;
-                    margin-top: 20px;
-                    padding: 10px;
-                }
-                #query {
-                    width: 100%;
-                    margin-top: 10px;
-                    padding: 10px;
-                }
-                #analyze {
-                    display: block;
-                    margin-top: 20px;
-                    padding: 10px 20px;
-                    background-color: #007acc;
-                    color: white;
-                    border: none;
-                    cursor: pointer;
-                }
-                #analyze:hover {
-                    background-color: #005b99;
-                }
-                #result {
-                    margin-top: 20px;
-                    white-space: pre-wrap;
-                    background-color: #f4f4f4;
-                    padding: 10px;
-                    border: 1px solid #ddd;
-                }
-			</style>
-		</head>
-        <body>
-            <h1>AI Code Analyzer</h1>
-            <div id="file-structure">
-                ${fileStructureHTML}
-            </div>
-            <select id="file-select" multiple></select>
-            <textarea id="query" rows="4" cols="50" placeholder="Enter your query..."></textarea>
-            <button id="analyze">Analyze</button>
-            <pre id="result"></pre>
+     <!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Code Analyzer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #121212;
+            color: #e0e0e0;
+        }
+       h1 {
+            color: #007acc;
+            text-shadow: 2px 2px 0 #005b99, 4px 4px 0 #004c7f; /* 3D effect with multiple shadows */
+        }
+        #file-structure {
+            margin: 20px 0;
+        }
+        .directory, .file {
+            margin: 10px 0;
+        }
+        .directory-name, .file-name {
+            cursor: pointer;
+            color: #81d4fa;
+            display: flex;
+            align-items: center;
+        }
+        .directory-name::before {
+            content: '\f07c';
+            font-family: 'Font Awesome 5 Free';
+            margin-right: 10px;
+        }
+        .file-name::before {
+            content: '\f15b';
+            font-family: 'Font Awesome 5 Free';
+            margin-right: 10px;
+        }
+        .directory-content {
+            display: none;
+            padding-left: 20px;
+            border-left: 1px solid #333;
+            margin-left: 10px;
+        }
+        .directory.open > .directory-content {
+            display: block;
+        }
+        input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+            accent-color: #80d8ff;
+        }
+        #file-select {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 5px;
+        }
+        #file-select option {
+            background-color: #1e1e1e;
+            color: #e0e0e0;
+        }
+        #query {
+            width: 98%;
+            margin-top: 10px;
+            padding: 10px;
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 5px;
+        }
+        #analyze {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 50px;
+            height: 50px;
+            margin-top: 20px;
+            margin-left: auto;
+            padding: 10px;
+            background-color: #007acc;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+        #analyze:hover {
+            background-color: #005b99;
+        }
+        #analyze i {
+            font-size: 24px;
+        }
+        #result {
+            margin-top: 20px;
+            white-space: pre-wrap;
+            background-color: #1e1e1e;
+            padding: 10px;
+            border: 1px solid #333;
+            color: #e0e0e0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>AI Code Analyzer</h1>
+    <div id="file-structure">
+        ${fileStructureHTML}
+    </div>
+    <select id="file-select" multiple></select>
+    <textarea id="query" rows="4" cols="50" placeholder="Enter your query..."></textarea>
+    <!-- Replace fa-chart-line with fa-brain icon -->
+    <button id="analyze"><i class="fas fa-brain"></i></button>
+    <pre id="result"></pre>
 
-            <script>
-                document.querySelectorAll('.directory-name').forEach(dir => {
-                    dir.addEventListener('click', () => {
-                        dir.parentElement.classList.toggle('open');
-                    });
-                });
+    <script>
+        document.querySelectorAll('.directory-name').forEach(dir => {
+            dir.addEventListener('click', () => {
+                dir.parentElement.classList.toggle('open');
+            });
+        });
 
-                const vscode = acquireVsCodeApi();
-                document.getElementById('analyze').addEventListener('click', () => {
-                    const selectedFiles = Array.from(document.querySelectorAll('#file-structure input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
-                    const query = document.getElementById('query').value;
-                    vscode.postMessage({ command: 'analyze', files: selectedFiles, query: query });
-                });
+        const vscode = acquireVsCodeApi();
+        document.getElementById('analyze').addEventListener('click', () => {
+            const selectedFiles = Array.from(document.querySelectorAll('#file-structure input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
+            const query = document.getElementById('query').value;
+            vscode.postMessage({ command: 'analyze', files: selectedFiles, query: query });
+        });
 
-                window.addEventListener('message', event => {
-                    const message = event.data;
-                    if (message.command === 'result') {
-                        document.getElementById('result').textContent = message.result;
-                    }
-                });
-            </script>
-        </body>
-        </html>
+        window.addEventListener('message', event => {
+            const message = event.data;
+            if (message.command === 'result') {
+                document.getElementById('result').textContent = message.result;
+            }
+        });
+    </script>
+</body>
+</html>
     `;
 }
 
