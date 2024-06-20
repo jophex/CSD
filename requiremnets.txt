@@ -1,0 +1,5 @@
+node modules
+axion
+dotenv
+npm version 10.7.0
+google/generative-ai
