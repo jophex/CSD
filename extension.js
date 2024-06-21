@@ -155,7 +155,7 @@ function getWebviewContent(fileStructure) {
     const fileStructureHTML = generateFileStructureHTML(fileStructure);
     // console.log(`Generated HTML: ${fileStructureHTML}`); // Log generated HTML
     return `
-   <!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -169,12 +169,13 @@ function getWebviewContent(fileStructure) {
             background-color: #121212;
             color: #e0e0e0;
         }
-       h1 {
+        h1 {
             color: #007acc;
             text-shadow: 2px 2px 0 #005b99, 4px 4px 0 #004c7f; /* 3D effect with multiple shadows */
+            margin-bottom: 20px; /* Space between heading and content */
         }
         #file-structure {
-            margin: 20px 0;
+            margin: 20px 0; /* Space below file structure */
         }
         .directory, .file {
             margin: 10px 0;
@@ -225,16 +226,18 @@ function getWebviewContent(fileStructure) {
         .textarea-container {
             position: relative;
             width: 100%;
+            margin-top: 10px;
         }
         #query {
-            width: 94%;
-            margin-top: 10px;
+            width: 100%;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
             color: #e0e0e0;
             border-radius: 5px;
             padding-right: 50px; /* Adjust padding to make space for the button */
+            resize: vertical; /* Allow vertical resizing */
+            min-height: 100px; /* Minimum height to show multiple lines */
         }
         #analyze {
             position: absolute;
@@ -266,6 +269,42 @@ function getWebviewContent(fileStructure) {
             border: 1px solid #333;
             color: #e0e0e0;
             border-radius: 5px;
+        }
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            h1 {
+                font-size: 24px;
+            }
+            #file-select, #query {
+                font-size: 14px;
+            }
+            #analyze {
+                width: 35px;
+                height: 35px;
+            }
+            #analyze i {
+                font-size: 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            h1 {
+                font-size: 20px;
+            }
+            #file-select, #query {
+                font-size: 12px;
+            }
+            #analyze {
+                width: 30px;
+                height: 30px;
+            }
+            #analyze i {
+                font-size: 14px;
+            }
         }
     </style>
 </head>
@@ -304,7 +343,6 @@ function getWebviewContent(fileStructure) {
     </script>
 </body>
 </html>
-
     `;
 }
 
