@@ -229,16 +229,17 @@ function getWebviewContent(fileStructure) {
             margin-top: 10px;
         }
         #query {
-            width: 100%;
+            width: 95%;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
             color: #e0e0e0;
             border-radius: 5px;
-            padding-right: 50px; /* Adjust padding to make space for the button */
+            padding-right: 60px; /* Adjust padding to make space for the button */
             resize: vertical; /* Allow vertical resizing */
             min-height: 100px; /* Minimum height to show multiple lines */
         }
+            
         #analyze {
             position: absolute;
             right: 10px;
