@@ -155,7 +155,7 @@ function getWebviewContent(fileStructure) {
     const fileStructureHTML = generateFileStructureHTML(fileStructure);
     // console.log(`Generated HTML: ${fileStructureHTML}`); // Log generated HTML
     return `
-     <!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -222,35 +222,41 @@ function getWebviewContent(fileStructure) {
             background-color: #1e1e1e;
             color: #e0e0e0;
         }
+        .textarea-container {
+            position: relative;
+            width: 100%;
+        }
         #query {
-            width: 98%;
+            width: 94%;
             margin-top: 10px;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
             color: #e0e0e0;
             border-radius: 5px;
+            padding-right: 50px; /* Adjust padding to make space for the button */
         }
         #analyze {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            width: 50px;
-            height: 50px;
-            margin-top: 20px;
-            margin-left: auto;
-            padding: 10px;
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 40px;
             background-color: #007acc;
             color: white;
             border: none;
             border-radius: 50%;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         #analyze:hover {
             background-color: #005b99;
         }
         #analyze i {
-            font-size: 24px;
+            font-size: 18px;
         }
         #result {
             margin-top: 20px;
@@ -269,9 +275,10 @@ function getWebviewContent(fileStructure) {
         ${fileStructureHTML}
     </div>
     <select id="file-select" multiple></select>
-    <textarea id="query" rows="4" cols="50" placeholder="Enter your query..."></textarea>
-    <!-- Replace fa-chart-line with fa-brain icon -->
-    <button id="analyze"><i class="fas fa-brain"></i></button>
+    <div class="textarea-container">
+        <textarea id="query" rows="4" cols="50" placeholder="Enter your query..."></textarea>
+        <button id="analyze"><i class="fas fa-brain"></i></button>
+    </div>
     <pre id="result"></pre>
 
     <script>
@@ -297,6 +304,7 @@ function getWebviewContent(fileStructure) {
     </script>
 </body>
 </html>
+
     `;
 }
 
