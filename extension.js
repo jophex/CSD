@@ -1,7 +1,7 @@
 const vscode = require('vscode');
 const fs = require('fs');
 const path = require('path');
-const axios = require('axios');
+
 
 require("dotenv").config({
   path: path.resolve(__dirname, '.env')
@@ -42,9 +42,9 @@ function activate(context) {
                 if (message.command === 'analyze') {
                     const filesToAnalyze = message.files;
                     const query = message.query;
-                    const fileContents = await getFileContents(filesToAnalyze);
-					console.log({'file content':fileContents});
-                    const result = await sendToAIAPI(fileContents, query);
+                    const fileContents = await getFileContents(filesToAnalyze);    // the file content has to be mad as an array / json and take only important text and share the data to ai 
+					console.log({'file content':fileContents});    
+                    const result = await analyzeCodeWithAI(fileContents, query);
                     panel.webview.postMessage({ command: 'result', result: result });
                 }
             });
@@ -80,22 +80,56 @@ async function getFileContents(files) {
 }
 
 
-async function sendToAIAPI(fileContents, query) {
-    const apiKey = Gemin_keys;
-    const apiUrl = 'https://api.gemini.ai/analyze'; // Replace with the actual API URL
+async function analyzeCodeWithAI(fileContents, query) {
+    const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-    const response = await axios.post(apiUrl, {
-        query: query,
-        files: fileContents
-    }, {
-        headers: {
-            'Authorization': `Bearer ${apiKey}`,
-            'Content-Type': 'application/json'
-        }
-    });
+    if (!Gemin_keys) {
+        console.error("API key is not defined");
+        throw new Error("API key is not defined");
+    }
 
-    return response.data;
+    const genAI = new GoogleGenerativeAI(Gemin_keys);
+    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    try {
+        const promptText = `Analyze the following code and respond to the query "${query}":\n\n${Object.values(fileContents).join('\n\n')}`;
+        const result = await model.generateContent([
+            { text: promptText }
+        ]);
+            
+            const candidate = result.response.candidates[0];
+            const text = candidate.content.parts[0].text;
+            console.log('Extracted text:', text);
+            return text;
+        // console.log('this is the responce ',result.response.candidates)
+        // return result.response.text;
+    } catch (error) {
+        console.error('Error calling AI API', error.response ? error.response.data : error.message);
+        throw error;
+    }
 }
+
+
+
+
+
+
+// async function sendToAIAPI(fileContents, query) {
+//     const apiKey = Gemin_keys;
+//     const apiUrl = 'https://api.gemini.ai/analyze'; 
+
+//     const response = await axios.post(apiUrl, {
+//         query: query,
+//         files: fileContents
+//     }, {
+//         headers: {
+//             'Authorization': `Bearer ${apiKey}`,
+//             'Content-Type': 'application/json'
+//         }
+//     });
+
+//     return response.data;
+// }
 
 
 // const { GoogleGenerativeAI } = require("@google/generative-ai");
@@ -155,7 +189,7 @@ function getWebviewContent(fileStructure) {
     const fileStructureHTML = generateFileStructureHTML(fileStructure);
     // console.log(`Generated HTML: ${fileStructureHTML}`); // Log generated HTML
     return `
- <!DOCTYPE html>
+   <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -169,13 +203,12 @@ function getWebviewContent(fileStructure) {
             background-color: #121212;
             color: #e0e0e0;
         }
-        h1 {
+       h1 {
             color: #007acc;
             text-shadow: 2px 2px 0 #005b99, 4px 4px 0 #004c7f; /* 3D effect with multiple shadows */
-            margin-bottom: 20px; /* Space between heading and content */
         }
         #file-structure {
-            margin: 20px 0; /* Space below file structure */
+            margin: 20px 0;
         }
         .directory, .file {
             margin: 10px 0;
@@ -226,18 +259,16 @@ function getWebviewContent(fileStructure) {
         .textarea-container {
             position: relative;
             width: 100%;
-            margin-top: 10px;
         }
         #query {
-            width: 100%;
+            width: 94%;
+            margin-top: 10px;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
             color: #e0e0e0;
             border-radius: 5px;
             padding-right: 50px; /* Adjust padding to make space for the button */
-            resize: vertical; /* Allow vertical resizing */
-            min-height: 100px; /* Minimum height to show multiple lines */
         }
         #analyze {
             position: absolute;
@@ -270,42 +301,6 @@ function getWebviewContent(fileStructure) {
             color: #e0e0e0;
             border-radius: 5px;
         }
-
-        /* Media Queries for responsiveness */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            h1 {
-                font-size: 24px;
-            }
-            #file-select, #query {
-                font-size: 14px;
-            }
-            #analyze {
-                width: 35px;
-                height: 35px;
-            }
-            #analyze i {
-                font-size: 16px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            h1 {
-                font-size: 20px;
-            }
-            #file-select, #query {
-                font-size: 12px;
-            }
-            #analyze {
-                width: 30px;
-                height: 30px;
-            }
-            #analyze i {
-                font-size: 14px;
-            }
-        }
     </style>
 </head>
 <body>
@@ -328,6 +323,7 @@ function getWebviewContent(fileStructure) {
         });
 
         const vscode = acquireVsCodeApi();
+
         document.getElementById('analyze').addEventListener('click', () => {
             const selectedFiles = Array.from(document.querySelectorAll('#file-structure input[type="checkbox"]:checked')).map(checkbox => checkbox.value);
             const query = document.getElementById('query').value;
@@ -343,6 +339,7 @@ function getWebviewContent(fileStructure) {
     </script>
 </body>
 </html>
+
     `;
 }
 
