@@ -263,7 +263,7 @@ function getWebviewContent(fileStructure) {
             margin-top: 10px;
         }
         #query {
-            width: 100%;
+            width: 96.5%;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
@@ -309,6 +309,7 @@ function getWebviewContent(fileStructure) {
         @media (max-width: 1080px) {
             #query {
                 padding-right: 50px; /* Adjust padding for smaller screen */
+                width: 96.5%;
             }
             #analyze {
                 width: 35px;
