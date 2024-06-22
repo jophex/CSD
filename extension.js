@@ -263,7 +263,7 @@ function getWebviewContent(fileStructure) {
             margin-top: 10px;
         }
         #query {
-            width: 94%;
+            width: 96.5%;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
