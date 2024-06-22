@@ -263,7 +263,7 @@ function getWebviewContent(fileStructure) {
             margin-top: 10px;
         }
         #query {
-            width: 96.5%;
+            width: 100%;
             padding: 10px;
             background-color: #1e1e1e;
             border: 1px solid #333;
@@ -306,6 +306,20 @@ function getWebviewContent(fileStructure) {
         }
 
         /* Media Queries for responsiveness */
+        @media (max-width: 1080px) {
+            #query {
+                padding-right: 50px; /* Adjust padding for smaller screen */
+            }
+            #analyze {
+                width: 35px;
+                height: 35px;
+                right: 5px; /* Adjust position for smaller screen */
+            }
+            #analyze i {
+                font-size: 16px;
+            }
+        }
+
         @media (max-width: 768px) {
             body {
                 padding: 10px;
