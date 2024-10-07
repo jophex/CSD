@@ -16,6 +16,29 @@
         "command": "extension.openAIAnalyzer",
         "title": "Open AI Code Analyzer"
       }
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "aiCodeAnalyzerContainer",
+          "title": "AI Code Analyzer",
+          "icon": "./media/chip.svg"
+        }
+      ]
+    },
+    "views": {
+      "aiCodeAnalyzerContainer": [
+        {
+          "id": "aiCodeAnalyzerView",
+          "name": "AI Code Analyzer"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "aiCodeAnalyzerView",
+        "contents": "Click to open Ai to analyze your files for debbuging"
+      }
     ]
   },
   "scripts": {
